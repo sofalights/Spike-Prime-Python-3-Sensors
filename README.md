@@ -3,9 +3,9 @@ Python for 3 color sensor line tracing robot
 
 left, middle, and right sensors are port b,d, and f respectively
 
-left and right motors are e, f respectively
+left and right motors are a, e respectively
 
-if using move motor (blue motor block equal in block based) for E SPECIFICALLY, reverse direction as the motor is flipped
+if using move motor (blue motor block equal in block based) for A SPECIFICALLY, reverse direction as the motor is flipped
 
 color is black for the line, green for the turn indicator ( detect green on the left is an indicator for left, and vice-versa), red for line break (for wrg)-- or for end of trace(for RoboCup), white is background color
 
