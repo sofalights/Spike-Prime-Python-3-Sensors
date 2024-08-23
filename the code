@@ -1,1 +1,68 @@
-# the inports
+from hub import light_matrix, port
+import motor
+import motor_pair
+import color
+import color_sensor
+import runloop
+speed = 20
+kp = 1.4
+left = 0
+right = 0
+cross = 0
+wait_delay = 300
+#573= kp*(d ref - 60) / 100 * 1050
+
+async def detect_side():
+    while True:
+        if color_sensor.reflection(port.B) <= 65:
+            global left 
+            left = 1 
+            await runloop.sleep_ms(wait_delay)
+            left = 0
+        elif color_sensor.reflection(port.F) <= 65:
+            global right
+            right = 1
+            await runloop.sleep_ms(wait_delay)
+            right = 0
+        elif color_sensor.reflection(port.B) <= 65 and color_sensor.reflection(port.F) <= 65:
+            global cross
+            cross = 1
+            await runloop.sleep_ms(wait_delay)
+            cross = 0
+
+        
+async def main():
+    motor_pair.pair(motor_pair.PAIR_1,port.A, port.E)
+    if color_sensor.reflection(port.B) <= 65 or color_sensor.reflection(port.F) <= 65:
+        if color_sensor.reflection(port.B) <= 65:
+            motor_pair.move_tank(motor_pair.PAIR_1, 0, 573)
+            await runloop.sleep_ms(1)
+        else:
+            motor_pair.move_tank(motor_pair.PAIR_1, 573, 0)
+            await runloop.sleep_ms(1)
+    else:
+        if left == 1:
+            motor_pair.move_tank(motor_pair.PAIR_1, 0, 400)
+            await runloop.sleep_ms(1)
+        elif right == 1:
+            motor_pair.move_tank(motor_pair.PAIR_1, 400, 0)
+            await runloop.sleep_ms(1)
+        elif color_sensor.reflection(port.D) <= 65:
+            motor_pair.move_tank(motor_pair.PAIR_1, 315, 315)
+            await runloop.sleep_ms(1)
+
+async def green_autism():
+    motor_pair.pair(motor_pair.PAIR_1, port.A, port.E)
+    if color_sensor.reflection(port.B) in range(65, 80) and color_sensor.color(port.B) == 3 or -1  and  color_sensor.reflection(port.F) in range(65, 80) and color_sensor.color(port.F) == 3 or -1:
+        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 360, 1000, -1000)
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000)
+    elif color_sensor.reflection(port.B) in range(65, 80) and color_sensor.color(port.B) == 3 or -1:
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000)
+        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 180, -1000, 1000)
+    elif color_sensor.reflection(port.F) in range(65, 80) and color_sensor.color(port.F) == 3 or -1:
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000)
+        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 180, 1000, -1000)
+
+
+
+runloop.run( detect_side(), green_autism(), main() )
