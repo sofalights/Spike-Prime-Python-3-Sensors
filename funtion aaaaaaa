@@ -54,10 +54,10 @@ async def detect_side():
 
 async def black_left():
     if color_sensor.reflection(port.D) <= 65:
-        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-45)/100*1050))) #sharp adjust value of negative
+        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-45)/100*1050)) , acceleration = 4750) #sharp adjust value of negative
         await runloop.sleep_ms(1)
     else:
-        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-60)/100*1050))) # curved adjust value of negative
+        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-60)/100*1050)) , acceleration = 4750) # curved adjust value of negative
         await runloop.sleep_ms(1)
 
 
@@ -66,10 +66,10 @@ async def black_left():
 
 async def black_right():
     if color_sensor.reflection(port.D) <= 65: # else aka right
-        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-45)/100*1050)), 0) #sharp adjust value of negative
+        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-45)/100*1050)), 0, acceleration = 4750) #sharp adjust value of negative
         await runloop.sleep_ms(1)
     else:
-        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-60)/100*1050)), 0)# curved adjust value of negative
+        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-60)/100*1050)), 0, acceleration = 4750)# curved adjust value of negative
         await runloop.sleep_ms(1)
 
 
@@ -78,7 +78,7 @@ async def black_right():
 
 async def black_main():
     if color_sensor.reflection(port.B) <= 65 and color_sensor.reflection(port.F) <= 65:
-                await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000) # dash cross adjust degree of distance (from center of wheel to center of sensor)
+                await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, stop = motor.SMART_BRAKE, acceleration = 4750, deceleration=10000) # dash cross adjust degree of distance (from center of wheel to center of sensor)
     elif color_sensor.reflection(port.B) <= 65 : # aka left
         black_left
     else:
@@ -90,16 +90,16 @@ async def black_main():
 
 async def green_main():
     if color_sensor.reflection(port.B) in range(65, 80) and color_sensor.color(port.B) == 3 or -1 and color_sensor.reflection(port.F) in range(65, 80) and color_sensor.color(port.F) == 3 or -1:
-        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000) #adjust
-        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 360, 1000, -1000) # u turn 180 degrees adjust degree motor moved (math says radius from center of rotation to wheel / 9 then * 360)
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, stop = motor.SMART_BRAKE, acceleration = 4750, deceleration=10000) #adjust
+        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 360, 1000, -1000) # u turn 180 degrees adjust degree motor moved (math says radius from center of rotation to wheel in cm / 9 then * 360)
         await runloop.sleep_ms(1)
     elif color_sensor.reflection(port.B) in range(65, 80) and color_sensor.color(port.B) == 3 or -1:
-        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000) # adjust
-        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 180, -1000, 1000) # left 90 degrees adjust degree motor moved (math says radius from center of rotation to wheel / 9 then * 180)
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, stop = motor.SMART_BRAKE, acceleration = 4750, deceleration=10000) # adjust
+        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 180, -1000, 1000) # left 90 degrees adjust degree motor moved (math says radius from center of rotation to wheel in cm / 9 then * 180)
         await runloop.sleep_ms(1)
     elif color_sensor.reflection(port.F) in range(65, 80) and color_sensor.color(port.F) == 3 or -1:
-        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, deceleration=10000) # adjust
-        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 180, 1000, -1000) # right 90 degrees adjust degree motor moved (math says radius from center of rotation to wheel / 9 then * 180)
+        await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, stop = motor.SMART_BRAKE, acceleration = 4750, deceleration=10000) # adjust
+        await motor_pair.move_tank_for_degrees(motor_pair.PAIR_1, 180, 1000, -1000) # right 90 degrees adjust degree motor moved (math says radius from center of rotation to wheel in cm / 9 then * 180)
         await runloop.sleep_ms(1)
 
 
@@ -108,10 +108,10 @@ async def green_main():
 
 async def overshoots():
     if left == 1:
-        motor_pair.move_tank(motor_pair.PAIR_1, 0, 400) # overshoot left
+        motor_pair.move_tank(motor_pair.PAIR_1, 0, 400, acceleration = 5000) # overshoot left
         await runloop.sleep_ms(1)
     elif right == 1:
-        motor_pair.move_tank(motor_pair.PAIR_1, 400, 0) # overshoot right
+        motor_pair.move_tank(motor_pair.PAIR_1, 400, 0, acceleration = 5000) # overshoot right
         await runloop.sleep_ms(1)
 
 
@@ -120,7 +120,7 @@ async def overshoots():
 
 async def forwards():
     if color_sensor.reflection(port.D) <= 65:
-            motor_pair.move_tank(motor_pair.PAIR_1, 315, 315) # forwards
+            motor_pair.move_tank(motor_pair.PAIR_1, 315, 315, acceleration = 4750) # forwards
             await runloop.sleep_ms(1)
 
 
@@ -143,3 +143,4 @@ async def main():
 
 
 runloop.run( detect_side(), main() )
+
