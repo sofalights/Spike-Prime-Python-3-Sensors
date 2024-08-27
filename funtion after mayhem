@@ -1,0 +1,49 @@
+from hub import light_matrix, port
+import motor
+import motor_pair
+import color
+import color_sensor
+import runloop
+import math
+
+
+
+
+
+speed = 20
+kp = 1.4
+left = 0
+right = 0
+cross = 0
+wait_delay = 300
+# for move forwards before green turn, adjust so degree moved makes it disatnce from wheel floor to black perpend line
+motor.reset_relative_position(port.A, 0)
+motor.reset_relative_position(port.E, 0)
+
+async def main():
+    motor_pair.pair(motor_pair.PAIR_1,port.A, port.E)
+    while True:
+        if color_sensor.reflection(port.B) < 90 or color_sensor.reflection(port.F) < 90:
+            if color_sensor.reflection(port.B) <= 65 or color_sensor.reflection(port.F) <= 65:
+                if color_sensor.reflection(port.B) <= 65 and color_sensor.reflection(port.F) <= 65:
+                    await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, stop = motor.SMART_BRAKE, acceleration = 4750, deceleration=10000) # dash cross adjust degree of distance (from center of wheel to center of sensor)
+                elif color_sensor.reflection(port.B) <= 65 : # aka left
+                    if color_sensor.reflection(port.D) <= 65:
+                        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-30)/100*1050)) , acceleration = 4750) #sharp adjust value of negative
+                    else:
+                        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-40)/100*1050)) , acceleration = 4750) # curved adjust value of negative
+                else:
+                    if color_sensor.reflection(port.D) <= 65: # else aka right
+                        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-30)/100*1050)), 0, acceleration = 4750) #sharp adjust value of negative
+                    else:
+                        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-40)/100*1050)), 0, acceleration = 4750)# curved adjust value of negativ
+        else:
+            if left == 1:
+                motor_pair.move_tank(motor_pair.PAIR_1, 0, 600, acceleration = 5000) # overshoot left
+            elif right == 1:
+                motor_pair.move_tank(motor_pair.PAIR_1, 600, 0, acceleration = 5000) # overshoot right
+            elif color_sensor.reflection(port.D) <= 65:
+                motor_pair.move_tank(motor_pair.PAIR_1, 450, 450, acceleration = 4750) # forwards
+
+
+runloop.run( main() )
