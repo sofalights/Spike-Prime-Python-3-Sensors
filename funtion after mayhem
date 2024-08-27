@@ -26,24 +26,41 @@ async def main():
         if color_sensor.reflection(port.B) < 90 or color_sensor.reflection(port.F) < 90:
             if color_sensor.reflection(port.B) <= 65 or color_sensor.reflection(port.F) <= 65:
                 if color_sensor.reflection(port.B) <= 65 and color_sensor.reflection(port.F) <= 65:
-                    await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, stop = motor.SMART_BRAKE, acceleration = 4750, deceleration=10000) # dash cross adjust degree of distance (from center of wheel to center of sensor)
+                    await motor_pair.move_for_degrees(motor_pair.PAIR_1, 64, 0, velocity=280, acceleration = 4750, deceleration=10000) # dash cross adjust degree of distance (from center of wheel to center of sensor)
                 elif color_sensor.reflection(port.B) <= 65 : # aka left
                     if color_sensor.reflection(port.D) <= 65:
-                        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-30)/100*1050)) , acceleration = 4750) #sharp adjust value of negative
+                        motor_pair.move_tank(motor_pair.PAIR_1, -69, (math.ceil(kp*(color_sensor.reflection(port.D)-40)/100*1050)) , acceleration = 4750) #sharp adjust value of negative
                     else:
-                        motor_pair.move_tank(motor_pair.PAIR_1, 0, (math.ceil(kp*(color_sensor.reflection(port.D)-40)/100*1050)) , acceleration = 4750) # curved adjust value of negative
+                        motor_pair.move_tank(motor_pair.PAIR_1, -69, (math.ceil(kp*(color_sensor.reflection(port.D)-50)/100*1050)) , acceleration = 4750) # curved adjust value of negative
                 else:
                     if color_sensor.reflection(port.D) <= 65: # else aka right
-                        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-30)/100*1050)), 0, acceleration = 4750) #sharp adjust value of negative
+                        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-40)/100*1050)), -69, acceleration = 4750) #sharp adjust value of negative
                     else:
-                        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-40)/100*1050)), 0, acceleration = 4750)# curved adjust value of negativ
+                        motor_pair.move_tank(motor_pair.PAIR_1, (math.ceil(kp*(color_sensor.reflection(port.D)-50)/100*1050)), -69, acceleration = 4750)# curved adjust value of negativ
         else:
             if left == 1:
-                motor_pair.move_tank(motor_pair.PAIR_1, 0, 600, acceleration = 5000) # overshoot left
+                motor_pair.move_tank(motor_pair.PAIR_1, 0, 450, acceleration = 5000) # overshoot left
             elif right == 1:
-                motor_pair.move_tank(motor_pair.PAIR_1, 600, 0, acceleration = 5000) # overshoot right
+                motor_pair.move_tank(motor_pair.PAIR_1, 450, 0, acceleration = 5000) # overshoot right
             elif color_sensor.reflection(port.D) <= 65:
-                motor_pair.move_tank(motor_pair.PAIR_1, 450, 450, acceleration = 4750) # forwards
+                motor_pair.move_tank(motor_pair.PAIR_1, 520, 520, acceleration = 4750) # forwards
 
+async def detect_side():
+    while True:
+        if color_sensor.reflection(port.B) <= 65:
+            global left
+            left = 1
+            await runloop.sleep_ms(wait_delay)
+            left = 0
+        elif color_sensor.reflection(port.F) <= 65:
+            global right
+            right = 1
+            await runloop.sleep_ms(wait_delay)
+            right = 0
+        elif color_sensor.reflection(port.B) <= 65 and color_sensor.reflection(port.F) <= 65:
+            global cross
+            cross = 1
+            await runloop.sleep_ms(wait_delay)
+            cross = 0
 
-runloop.run( main() )
+runloop.run( main() , detect_side())
